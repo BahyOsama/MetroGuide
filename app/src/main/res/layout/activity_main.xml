@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/myImageView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:alpha="0.4"
+        android:scaleType="fitEnd"
+        android:src="@drawable/metnew"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.632" />
+
+    <Spinner
+        android:id="@+id/depStationSpinner"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="100dp"
+        android:background="@drawable/border_background"
+        android:minHeight="48dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Spinner
+        android:id="@+id/arrStationSpinner"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="45dp"
+        android:background="@drawable/border_background"
+        android:minHeight="48dp"
+        app:layout_constraintEnd_toEndOf="@+id/depStationSpinner"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/depStationSpinner"
+        app:layout_constraintTop_toBottomOf="@+id/depStationSpinner" />
+
+    <Button
+        android:id="@+id/showRoutesButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:backgroundTint="@color/teal_700"
+        android:onClick="ShowRoutes"
+        android:text="Going Trip Routes"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/arrStationSpinner"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/arrStationSpinner"
+        app:layout_constraintTop_toBottomOf="@+id/DestinationText"
+        tools:ignore="HardcodedText,UsingOnClickInXml" />
+
+    <Button
+        android:id="@+id/showRoutesButton2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:backgroundTint="#3F51B5"
+        android:onClick="ShowReturnRoutes"
+        android:text="Return Trip Routes"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/arrStationSpinner"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/arrStationSpinner"
+        app:layout_constraintTop_toBottomOf="@+id/showRoutesButton"
+        tools:ignore="HardcodedText,UsingOnClickInXml" />
+
+    <Button
+        android:id="@+id/resetButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="250dp"
+        android:layout_marginTop="235dp"
+        android:layout_marginEnd="50dp"
+        android:backgroundTint="#5D0E29"
+        android:onClick="clearData"
+        android:text="Clear Data"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/showRoutesButton2"
+        tools:ignore="HardcodedText,UsingOnClickInXml" />
+
+    <SeekBar
+        android:id="@+id/sortBar"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="250dp"
+        android:layout_marginEnd="50dp"
+        android:max="1"
+        android:rotation="90"
+        app:layout_constraintEnd_toStartOf="@+id/resetButton"
+        app:layout_constraintTop_toBottomOf="@+id/showRoutesButton2" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="-15dp"
+        android:background="@drawable/border_simple"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:text="Sort by stations no."
+        app:layout_constraintEnd_toStartOf="@+id/sortBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/sortBar"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/border_simple"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:text="Sort by exchange no."
+        app:layout_constraintEnd_toStartOf="@+id/sortBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        tools:ignore="HardcodedText" />
+
+    <ImageView
+        android:id="@+id/HomePositionImg"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/border_icon"
+        android:clickable="true"
+        android:contentDescription="icon find nearst"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.056"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/location"
+        tools:ignore="HardcodedText,KeyboardInaccessibleWidget" />
+
+    <ImageView
+        android:id="@+id/DepRouteImg"
+        android:layout_width="58dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="9dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/border_icon"
+        android:clickable="true"
+        android:contentDescription="icons start station"
+        app:layout_constraintBottom_toBottomOf="@+id/depStationSpinner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/depStationSpinner"
+        app:layout_constraintTop_toTopOf="@+id/depStationSpinner"
+        app:srcCompat="@drawable/route"
+        tools:ignore="HardcodedText,KeyboardInaccessibleWidget" />
+
+    <ImageView
+        android:id="@+id/ArrRouteImg"
+        android:layout_width="58dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="9dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/border_icon"
+        android:clickable="true"
+        android:contentDescription="icons end stations"
+        app:layout_constraintBottom_toBottomOf="@+id/arrStationSpinner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/arrStationSpinner"
+        app:layout_constraintTop_toTopOf="@+id/arrStationSpinner"
+        app:srcCompat="@drawable/route"
+        tools:ignore="HardcodedText,KeyboardInaccessibleWidget" />
+
+    <EditText
+        android:id="@+id/DestinationText"
+        android:layout_width="242dp"
+        android:layout_height="49dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="30dp"
+        android:autofillHints="postalAddress"
+        android:background="@drawable/border_background"
+        android:ems="10"
+        android:fontFamily="@font/alexandria_bold"
+        android:hint="Search By Address"
+        android:inputType="textPersonName"
+        android:paddingStart="5dp"
+        android:paddingEnd="15dp"
+        android:textSize="13sp"
+        app:layout_constraintStart_toStartOf="@+id/arrStationSpinner"
+        app:layout_constraintTop_toBottomOf="@+id/arrStationSpinner"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/NearstStationButton"
+        android:layout_width="86dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="25dp"
+        android:backgroundTint="@color/teal_700"
+        android:onClick="NearstStation"
+        android:text="Nearest Station"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/DestinationText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/DestinationText"
+        app:layout_constraintTop_toTopOf="@+id/DestinationText"
+        tools:ignore="HardcodedText,SmallSp,UsingOnClickInXml" />
+
+    <TextView
+        android:id="@+id/startTexs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:fontFamily="@font/alexandria_bold"
+        android:text="Departure Station"
+        android:textColor="#000000"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/depStationSpinner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.38"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/alexandria_bold"
+        android:text="Arrival Station"
+        android:textColor="#000000"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/arrStationSpinner"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.357"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="HardcodedText" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="36dp"
+        android:layout_height="49dp"
+        android:layout_marginEnd="20dp"
+        android:background="@drawable/border_background"
+        android:contentDescription="search"
+        app:layout_constraintEnd_toStartOf="@+id/NearstStationButton"
+        app:layout_constraintStart_toEndOf="@+id/DestinationText"
+        app:layout_constraintTop_toTopOf="@+id/DestinationText"
+        app:srcCompat="@drawable/ic_destin"
+        tools:ignore="HardcodedText" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="28dp"
+        app:layout_constraintBottom_toBottomOf="@+id/HomePositionImg"
+        app:layout_constraintStart_toEndOf="@+id/HomePositionImg"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.214"
+        app:srcCompat="@drawable/ic_arrs" />
+
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintBottom_toTopOf="@+id/DepRouteImg"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/startTexs"
+        app:layout_constraintVertical_bias="1.0"
+        app:srcCompat="@drawable/ixmap" />
+
+    <ImageView
+        android:id="@+id/imageView5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintBottom_toTopOf="@+id/ArrRouteImg"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textView5"
+        app:layout_constraintVertical_bias="0.75"
+        app:srcCompat="@drawable/ixmap" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
