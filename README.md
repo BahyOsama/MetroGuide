@@ -29,10 +29,10 @@ A user-friendly application developed as the final project for the **(DEPI)**.
    ```  
 
 ## Team Members  
-- **Mina Nady**  
-- **Shehab Khalil**  
-- **Samuel Anis**  
-- **Bahi Osama**  
+- **Mina Nady Mofid**  
+- **Shehab Khalil Mohamed**  
+- **Samuel Anis Fawzy**  
+- **Bahy Osama Ali**  
 
 ## Acknowledgments  
 - Guidance and support from DEPI instructors.  
