@@ -1,38 +1,42 @@
-# MetroGuide - Android App
+# Metro App 🚇  
+A user-friendly application developed as the final project for the **(DEPI)**.
 
-MetroGuide is an Android mobile application designed to help users navigate metro systems easily. With features like metro route planning, real-time updates, and detailed station information, MetroGuide makes commuting simpler for both locals and travelers in various cities.
+## Features  
+- **Metro Route Finder:** Quickly find routes between stations.  
+- **Fare Estimator:** Calculate trip costs based on the starting and destination points.  
+- **Interactive Map:** View and navigate through the metro map for better understanding.  
 
-## Features
+## Tech Stack  
+- **Frontend:** Flutter  
+- **Data Storage:** Local storage  
 
-- **Interactive Metro Maps**: View metro station maps with routes and connections.
-- **Route Planner**: Plan your journey by selecting a start and destination station.
-- **Real-Time Updates**: Get live updates on train schedules, delays, and service changes.
-- **Multiple City Support**: Support for metro systems in various cities (additional cities coming soon).
-- **User-Friendly Interface**: Designed with simplicity and usability in mind.
+## Installation  
+1. Clone this repository:  
+   ```bash  
+   git clone https://github.com/PeaStar2024/metro-app.git  
+   ```  
+2. Navigate to the project directory:  
+   ```bash  
+   cd metro-app  
+   ```  
+3. Install dependencies:  
+   ```bash  
+   flutter pub get  
+   ```  
+4. Run the app:  
+   ```bash  
+   flutter run  
+   ```  
 
-## Screenshots
+## Team Members  
+- **Mina Nady**  
+- **Shehab Khalil**  
+- **Samuel Anis**  
+- **Bahi Osama**  
 
-> Add screenshots of your app here to give potential users a preview.
+## Acknowledgments  
+- Guidance and support from DEPI instructors.  
 
+## License  
+This project is licensed under the [MIT License](LICENSE).  
 
-### 1. Clone the Repository
-
-Issues
-If you encounter any issues or have suggestions for improvements, please open an issue in the Issues section.
-
-License
-MetroGuide is open-source software released under the MIT License.
-
-Contact
-For any inquiries, feedback, or collaboration, feel free to reach out:
-Developer Team:
-Mina Nady Mofid /
-Shehab Khalil Mohamed /
-Samuel Anis Fawzy /
-Bahy Osama Ali
-
-
-Email: [bahyosama11@gmail.com]
-
-
-This README provides an excellent starting point for your GitHub repository. Feel free to customize it further to suit the exact functionality and setup of your app! Let me know if you need help with anything else.
