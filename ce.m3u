@@ -44,9 +44,9 @@ https://mo3ad.xyz/live/rHZRdd7PFr/KbjNvZVzJD/513.ts
 #EXTINF:0 tvg-id="ext" group-title="belN Sports HD",⚽ beIN AFC 3ᴴᴰ
 https://mo3ad.xyz/live/rHZRdd7PFr/KbjNvZVzJD/514.ts
 
-#EXTINF:1 tvg-id="ext" group-title="belN Sports SD", beIN SPORTS 1sd
+#EXTINF: tvg-id="ext" group-title="belN Sports SD", beIN SPORTS 1sd
 https://mo3ad.xyz/live/rHZRdd7PFr/KbjNvZVzJD/515.ts
-#EXTINF:1 tvg-id="ext" group-title="belN Sports SD", beIN SPORTS 2sd
+#EXTINF: tvg-id="ext" group-title="belN Sports SD", beIN SPORTS 2sd
 https://mo3ad.xyz/live/rHZRdd7PFr/KbjNvZVzJD/516.ts
 #EXTINF:0 tvg-id="ext" group-title="belN Sports SD", beIN SPORTS 3sd
 https://mo3ad.xyz/live/rHZRdd7PFr/KbjNvZVzJD/517.ts
@@ -124,6 +124,7 @@ https://mo3ad.xyz/live/rHZRdd7PFr/KbjNvZVzJD/35.ts
 #EXTINF:0 tvg-id="ADSports2.net" group-title="ADI STARZ PLAY SPORTS قنوات ابوظبي الرياضية",AD Sports 2
 https://mo3ad.xyz/live/rHZRdd7PFr/KbjNvZVzJD/36.ts
 
+
 #EXTINF:0 tvg-id="ext" group-title="SSC SPORTS KIMO",SSC 1
 http://strong4kgold.xyz/play/live.php?mac=00:1A:79:37:B5:92&stream=1310458&extension=ts&play_token=N5kwp1RBAW&sn2=
 #EXTINF:0 tvg-id="ext" group-title="SSC SPORTS KIMO",SSC 2
@@ -156,6 +157,7 @@ https://mo3ad.xyz/live/rHZRdd7PFr/KbjNvZVzJD/43.ts
 https://mo3ad.xyz/live/rHZRdd7PFr/KbjNvZVzJD/44.ts
 #EXTINF:0 tvg-id="ext" group-title="SSC SPORTS اس اس سي",SSC Extra 3 HD
 https://mo3ad.xyz/live/rHZRdd7PFr/KbjNvZVzJD/45.ts
+
 
 #EXTINF:0 tvg-id="ARTAflam1.net" group-title="ART",ART Aflam 1
 https://mo3ad.xyz/live/rHZRdd7PFr/KbjNvZVzJD/557.ts
