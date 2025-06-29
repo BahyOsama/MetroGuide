@@ -1,0 +1,2969 @@
+lib/main.dart
+
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'core/providers/theme_provider.dart';
+import 'core/providers/user_provider.dart';
+import 'core/providers/tournament_provider.dart';
+import 'core/providers/coupon_provider.dart';
+import 'core/providers/language_provider.dart';
+import 'core/providers/game_provider.dart';
+import 'shared/localization/app_localizations.dart';
+import 'core/router/app_router.dart';
+
+Future<void> main() async {
+   WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'hhttps://sbsegkqvqgcwslzabixp.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNic2Vna3F2cWdjd3NsemFiaXhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAxNzQxMTYsImV4cCI6MjA2NTc1MDExNn0.PjHwIoltCh37Nrt5MvDJe4fWIIrY_8ZGTJE6JDB5h2Y',
+  );
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => TournamentProvider()),
+        ChangeNotifierProvider(create: (_) => CouponProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
+        ChangeNotifierProvider(create: (_) => GameProvider()),
+      ],
+      child: const LocalizedApp(),
+    ),
+  );
+}
+
+class LocalizedApp extends StatelessWidget {
+  const LocalizedApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
+
+    return MaterialApp.router(
+      title: 'The Game',
+      debugShowCheckedModeBanner: false,
+      theme: Provider.of<ThemeProvider>(context).theme,
+      darkTheme: ThemeData.dark(),
+      locale: languageProvider.locale,
+      supportedLocales: const [Locale('ar', ''), Locale('en', '')],
+      localizationsDelegates: [
+        AppLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      routerConfig: AppRouter.router,
+    );
+  }
+}
+
+lib/core/router/app_router.dart
+
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../features/navigation/splash_screen.dart';
+import '../../features/navigation/main_navigation_screen.dart';
+import '../../features/home/home_screen.dart';
+import '../../features/game/presentation/screens/game_screen.dart';
+import '../../features/wallet/wallet_screen.dart';
+import '../../features/profile/profile_screen.dart';
+import '../../features/settings/settings_screen.dart';
+import '../../features/tournament/tournaments_screen.dart';
+
+class AppRouter {
+  static final GoRouter router = GoRouter(
+    initialLocation: '/splash',
+    routes: [
+      // Splash Screen
+      GoRoute(
+        path: '/splash',
+        name: 'splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
+
+      // Main Navigation (Bottom Navigation)
+      GoRoute(
+        path: '/',
+        name: 'main',
+        builder: (context, state) => const MainNavigationScreen(),
+      ),
+
+      // Individual Screens (for direct navigation)
+      GoRoute(
+        path: '/home',
+        name: 'home',
+        builder: (context, state) => const HomeScreen(),
+      ),
+
+      GoRoute(
+        path: '/game',
+        name: 'game',
+        builder: (context, state) => const GameScreen(),
+      ),
+
+      GoRoute(
+        path: '/wallet',
+        name: 'wallet',
+        builder: (context, state) => const WalletScreen(),
+      ),
+
+      GoRoute(
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const ProfileScreen(),
+      ),
+
+      GoRoute(
+        path: '/settings',
+        name: 'settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
+
+      GoRoute(
+        path: '/tournaments',
+        name: 'tournaments',
+        builder: (context, state) => const TournamentsScreen(),
+      ),
+    ],
+
+    // Error handling
+    errorBuilder:
+        (context, state) => Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                Text(
+                  'Page not found',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Error: ${state.error}',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () => context.go('/'),
+                  child: const Text('Go Home'),
+                ),
+              ],
+            ),
+          ),
+        ),
+  );
+}
+
+lib/core/router/navigation_helper.dart
+
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+class NavigationHelper {
+  // Main navigation
+  static void goToSplash(BuildContext context) => context.go('/splash');
+  static void goToMain(BuildContext context) => context.go('/');
+  static void goToHome(BuildContext context) => context.go('/home');
+  static void goToGame(BuildContext context) => context.go('/game');
+  static void goToWallet(BuildContext context) => context.go('/wallet');
+  static void goToProfile(BuildContext context) => context.go('/profile');
+  static void goToSettings(BuildContext context) => context.go('/settings');
+  static void goToTournaments(BuildContext context) =>
+      context.go('/tournaments');
+
+  // Push navigation (for sub-screens)
+  static void pushToGame(BuildContext context) => context.push('/game');
+  static void pushToWallet(BuildContext context) => context.push('/wallet');
+  static void pushToProfile(BuildContext context) => context.push('/profile');
+  static void pushToSettings(BuildContext context) => context.push('/settings');
+  static void pushToTournaments(BuildContext context) =>
+      context.push('/tournaments');
+
+  // Replace navigation
+  static void replaceWithHome(BuildContext context) => context.go('/home');
+  static void replaceWithMain(BuildContext context) => context.go('/');
+
+  // Pop navigation
+  static void pop(BuildContext context) => context.pop();
+}
+
+lib/core/models/user.dart
+
+class User {
+  final String id;
+  final String name;
+  final int rank;
+  final int balance;
+  final int wins;
+  final int losses;
+  final int totalEarned;
+  final int totalSpent;
+
+  User({
+    required this.id,
+    required this.name,
+    required this.rank,
+    required this.balance,
+    required this.wins,
+    required this.losses,
+    required this.totalEarned,
+    required this.totalSpent,
+  });
+
+  double get winRatio => wins / (wins + losses);
+
+  User copyWith({
+    String? id,
+    String? name,
+    int? rank,
+    int? balance,
+    int? wins,
+    int? losses,
+    int? totalEarned,
+    int? totalSpent,
+  }) {
+    return User(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      rank: rank ?? this.rank,
+      balance: balance ?? this.balance,
+      wins: wins ?? this.wins,
+      losses: losses ?? this.losses,
+      totalEarned: totalEarned ?? this.totalEarned,
+      totalSpent: totalSpent ?? this.totalSpent,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'rank': rank,
+      'balance': balance,
+      'wins': wins,
+      'losses': losses,
+      'totalEarned': totalEarned,
+      'totalSpent': totalSpent,
+    };
+  }
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'] as String,
+      name: json['name'] as String,
+      rank: json['rank'] as int,
+      balance: json['balance'] as int,
+      wins: json['wins'] as int,
+      losses: json['losses'] as int,
+      totalEarned: json['totalEarned'] as int,
+      totalSpent: json['totalSpent'] as int,
+    );
+  }
+}
+
+lib/core/models/tournament.dart
+
+class Tournament {
+  final String id;
+  final String name;
+  final int prize;
+  final int players;
+  final int maxPlayers;
+  final DateTime startTime;
+  final TournamentRules rules;
+
+  Tournament({
+    required this.id,
+    required this.name,
+    required this.prize,
+    required this.players,
+    required this.maxPlayers,
+    required this.startTime,
+    required this.rules,
+  });
+
+  Tournament copyWith({int? players}) {
+    return Tournament(
+      id: id,
+      name: name,
+      prize: prize,
+      players: players ?? this.players,
+      maxPlayers: maxPlayers,
+      startTime: startTime,
+      rules: rules,
+    );
+  }
+
+  String get timeLeft {
+    final now = DateTime.now();
+    if (startTime.isBefore(now)) return 'Started';
+
+    final diff = startTime.difference(now);
+    if (diff.inDays > 0) return '${diff.inDays} days';
+    if (diff.inHours > 0) return '${diff.inHours} hours';
+    return '${diff.inMinutes} min';
+  }
+}
+
+class TournamentRules {
+  final int rounds;
+  final int winCondition;
+  final String emergencyRules;
+
+  TournamentRules({
+    required this.rounds,
+    required this.winCondition,
+    required this.emergencyRules,
+  });
+}
+
+
+lib/core/models/game_state.dart
+
+
+enum GameStatus { notStarted, playing, gameOver }
+
+class GameState {
+  final GameStatus status;
+  final int score;
+  final int timeLeft;
+  final bool isWon;
+
+  GameState({
+    required this.status,
+    required this.score,
+    required this.timeLeft,
+    required this.isWon,
+  });
+
+  GameState copyWith({
+    GameStatus? status,
+    int? score,
+    int? timeLeft,
+    bool? isWon,
+  }) {
+    return GameState(
+      status: status ?? this.status,
+      score: score ?? this.score,
+      timeLeft: timeLeft ?? this.timeLeft,
+      isWon: isWon ?? this.isWon,
+    );
+  }
+
+  factory GameState.initial() {
+    return GameState(
+      status: GameStatus.notStarted,
+      score: 0,
+      timeLeft: 60,
+      isWon: false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'status': status.toString(),
+      'score': score,
+      'timeLeft': timeLeft,
+      'isWon': isWon,
+    };
+  }
+
+  factory GameState.fromJson(Map<String, dynamic> json) {
+    return GameState(
+      status: GameStatus.values.firstWhere(
+        (e) => e.toString() == json['status'],
+      ),
+      score: json['score'] as int,
+      timeLeft: json['timeLeft'] as int,
+      isWon: json['isWon'] as bool,
+    );
+  }
+}
+
+lib/core/models/coupon.dart
+class Coupon {
+  final String id;
+  final String code;
+  final int value;
+  final DateTime expiry;
+  final String condition;
+  final bool isUsed;
+
+  Coupon({
+    required this.id,
+    required this.code,
+    required this.value,
+    required this.expiry,
+    required this.condition,
+    required this.isUsed,
+  });
+
+  Coupon copyWith({bool? isUsed}) {
+    return Coupon(
+      id: id,
+      code: code,
+      value: value,
+      expiry: expiry,
+      condition: condition,
+      isUsed: isUsed ?? this.isUsed,
+    );
+  }
+
+  bool get isValid => !isUsed && expiry.isAfter(DateTime.now());
+}
+
+
+lib/core/providers/user_provider.dart
+
+import 'package:flutter/foundation.dart';
+import '../models/user.dart';
+
+class UserProvider extends ChangeNotifier {
+  User _user = User(
+    id: '1',
+    name: 'John Doe',
+    rank: 1,
+    balance: 1000,
+    wins: 10,
+    losses: 5,
+    totalEarned: 2000,
+    totalSpent: 1000,
+  );
+
+  User get user => _user;
+
+  void updateBalance(int amount) {
+    _user = _user.copyWith(
+      balance: _user.balance + amount,
+      totalEarned: amount > 0 ? _user.totalEarned + amount : _user.totalEarned,
+      totalSpent: amount < 0 ? _user.totalSpent - amount : _user.totalSpent,
+    );
+    notifyListeners();
+  }
+
+  void updateStats({bool isWin = true}) {
+    _user = _user.copyWith(
+      wins: isWin ? _user.wins + 1 : _user.wins,
+      losses: !isWin ? _user.losses + 1 : _user.losses,
+    );
+    notifyListeners();
+  }
+}
+
+
+lib/core/providers/tournament_provider.dart
+
+
+import 'package:flutter/foundation.dart';
+import '../models/tournament.dart';
+
+class TournamentProvider with ChangeNotifier {
+  final List<Tournament> _tournaments = [
+    Tournament(
+      id: 't1',
+      name: 'بطولة الذهب',
+      prize: 5000,
+      players: 32,
+      maxPlayers: 64,
+      startTime: DateTime.now().add(const Duration(hours: 2)),
+      rules: TournamentRules(
+        rounds: 5,
+        winCondition: 152,
+        emergencyRules: 'إلغاء البطولة عند اكتشاف الغش',
+      ),
+    ),
+    Tournament(
+      id: 't2',
+      name: 'كأس الماس',
+      prize: 10000,
+      players: 18,
+      maxPlayers: 32,
+      startTime: DateTime.now().add(const Duration(days: 1)),
+      rules: TournamentRules(
+        rounds: 3,
+        winCondition: 100,
+        emergencyRules: 'إيقاف اللاعبين المخالفين',
+      ),
+    ),
+  ];
+
+  List<Tournament> get tournaments => _tournaments;
+
+  void createTournament(Tournament tournament) {
+    _tournaments.add(tournament);
+    notifyListeners();
+  }
+
+  void joinTournament(String tournamentId) {
+    final index = _tournaments.indexWhere((t) => t.id == tournamentId);
+    if (index != -1) {
+      final tournament = _tournaments[index];
+      if (tournament.players < tournament.maxPlayers) {
+        _tournaments[index] = tournament.copyWith(
+          players: tournament.players + 1,
+        );
+        notifyListeners();
+      }
+    }
+  }
+}
+
+lib/core/providers/theme_provider.dart
+
+import 'package:flutter/material.dart';
+
+class ThemeProvider extends ChangeNotifier {
+  bool _isDarkMode = false;
+
+  bool get isDarkMode => _isDarkMode;
+
+  void toggleTheme() {
+    _isDarkMode = !_isDarkMode;
+    notifyListeners();
+  }
+
+  ThemeData get theme {
+    return _isDarkMode ? _darkTheme : _lightTheme;
+  }
+
+  static final _lightTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.light,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: Colors.blue,
+      brightness: Brightness.light,
+    ),
+    appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
+    cardTheme: CardTheme(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    ),
+  );
+
+  static final _darkTheme = ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: Colors.blue,
+      brightness: Brightness.dark,
+    ),
+    appBarTheme: const AppBarTheme(centerTitle: true, elevation: 0),
+    cardTheme: CardTheme(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    ),
+  );
+}
+
+lib/core/providers/language_provider.dart
+
+
+import 'package:flutter/material.dart';
+
+class LanguageProvider extends ChangeNotifier {
+  String _currentLanguage = 'en';
+
+  String get currentLanguage => _currentLanguage;
+
+  void setLanguage(String language) {
+    if (_currentLanguage != language) {
+      _currentLanguage = language;
+      notifyListeners();
+    }
+  }
+
+  Locale get locale {
+    return Locale(_currentLanguage);
+  }
+
+  bool get isRTL {
+    return _currentLanguage == 'ar';
+  }
+}
+
+
+lib/core/providers/game_provider.dart
+
+import 'dart:async';
+import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
+import '../models/game_state.dart';
+import 'user_provider.dart';
+import '../../shared/constants/navigation.dart';
+
+class GameProvider extends ChangeNotifier {
+  GameState _gameState = GameState.initial();
+  Timer? _timer;
+
+  GameState get gameState => _gameState;
+
+  void startGame() {
+    _gameState = GameState(
+      status: GameStatus.playing,
+      score: 0,
+      timeLeft: 60,
+      isWon: false,
+    );
+    notifyListeners();
+    _startTimer();
+  }
+
+  void updateScore() {
+    if (_gameState.status == GameStatus.playing) {
+      _gameState = _gameState.copyWith(score: _gameState.score + 1);
+      notifyListeners();
+    }
+  }
+
+  void _startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_gameState.timeLeft > 0) {
+        _gameState = _gameState.copyWith(timeLeft: _gameState.timeLeft - 1);
+        notifyListeners();
+      } else {
+        _endGame();
+      }
+    });
+  }
+
+  void _endGame() {
+    _timer?.cancel();
+    final isWon = _gameState.score >= 50;
+    _gameState = _gameState.copyWith(status: GameStatus.gameOver, isWon: isWon);
+    notifyListeners();
+
+    if (isWon) {
+      final userProvider = Provider.of<UserProvider>(
+        navigatorKey.currentContext!,
+        listen: false,
+      );
+      userProvider.updateBalance(100);
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+}
+
+lib/core/providers/coupon_provider.dart
+
+import 'package:flutter/foundation.dart';
+import 'package:provider/provider.dart';
+import '../models/coupon.dart';
+import 'user_provider.dart';
+import '../../shared/constants/navigation.dart';
+
+class CouponProvider with ChangeNotifier {
+  final List<Coupon> _coupons = [
+    Coupon(
+      id: 'c1',
+      code: 'RAMADAN2023',
+      value: 500,
+      expiry: DateTime(2023, 12, 31),
+      condition: 'الانضمام إلى 3 بطولات',
+      isUsed: false,
+    ),
+    Coupon(
+      id: 'c2',
+      code: 'WELCOME100',
+      value: 1000,
+      expiry: DateTime.now().add(const Duration(days: 1)),
+      condition: 'لا يوجد',
+      isUsed: true,
+    ),
+  ];
+
+  List<Coupon> get coupons => _coupons.where((c) => !c.isUsed).toList();
+
+  void generateCoupon(
+    String code,
+    int value,
+    Duration expiry,
+    String condition,
+  ) {
+    _coupons.add(
+      Coupon(
+        id: 'c${_coupons.length + 1}',
+        code: code,
+        value: value,
+        expiry: DateTime.now().add(expiry),
+        condition: condition,
+        isUsed: false,
+      ),
+    );
+    notifyListeners();
+  }
+
+  void redeemCoupon(String couponId) {
+    final index = _coupons.indexWhere((c) => c.id == couponId);
+    if (index != -1) {
+      _coupons[index] = _coupons[index].copyWith(isUsed: true);
+      Provider.of<UserProvider>(
+        navigatorKey.currentContext!,
+        listen: false,
+      ).updateBalance(_coupons[index].value);
+      notifyListeners();
+    }
+  }
+}
+
+
+lib/shared/widgets/rating_bar_indicator.dart
+
+import 'package:flutter/material.dart';
+
+class RatingBarIndicator extends StatelessWidget {
+  final double rating;
+  final Widget Function(BuildContext, int) itemBuilder;
+  final int itemCount;
+  final double itemSize;
+  final Axis direction;
+  final bool unratedColor;
+
+  const RatingBarIndicator({
+    super.key,
+    required this.rating,
+    required this.itemBuilder,
+    this.itemCount = 5,
+    this.itemSize = 20.0,
+    this.direction = Axis.horizontal,
+    this.unratedColor = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      direction: direction,
+      children: List.generate(itemCount, (index) {
+        final item = itemBuilder(context, index);
+        final color =
+            index < rating.floor()
+                ? null
+                : index < rating.ceil()
+                ? Colors.grey.withValues(alpha: .5)
+                : Colors.grey.withValues(alpha: .2);
+
+        return SizedBox(
+          width: itemSize,
+          height: itemSize,
+          child: ColorFiltered(
+            colorFilter: ColorFilter.mode(
+              color ?? Colors.transparent,
+              BlendMode.srcATop,
+            ),
+            child: item,
+          ),
+        );
+      }),
+    );
+  }
+}
+
+lib/shared/models/chart_data.dart
+
+
+class LinearSales {
+  final int day;
+  final int sales;
+
+  LinearSales(this.day, this.sales);
+}
+
+class OrdinalSales {
+  final String year;
+  final int sales;
+
+  OrdinalSales(this.year, this.sales);
+}
+
+class PieData {
+  final String label;
+  final int value;
+
+  PieData(this.label, this.value);
+}
+
+
+lib/shared/localization/app_localizations.dart
+
+import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+
+class AppLocalizations {
+  static final Map<String, Map<String, String>> _localizedValues = {
+    'en': {
+      'title': 'Jackaroo King',
+      'home': 'Home',
+      'profile': 'Profile',
+      'game': 'Game',
+      'tournaments': 'Tournaments',
+      'live_tournaments': 'Live Tournaments',
+      'events': 'Events',
+      'wallet': 'Wallet',
+      'balance': 'Balance',
+      'play': 'Play',
+      'settings': 'Settings',
+      'language': 'Language',
+      'theme': 'Theme',
+      'statistics': 'Statistics',
+      'win_ratio': 'Win Ratio',
+      'global_rank': 'Global Rank',
+      'prizes': 'Prizes',
+      'customize': 'Customize',
+      'background': 'Background',
+      'frames': 'Frames',
+      'notifications': 'Notifications',
+      'admin_panel': 'Admin Panel',
+      'create_tournament': 'Create Tournament',
+      'coupons': 'Coupons',
+      'analytics': 'Analytics',
+      'matchmaking': 'Matchmaking',
+      'security': 'Security',
+      'arabic': 'Arabic',
+      'english': 'English',
+      'light': 'Light',
+      'dark': 'Dark',
+      'system': 'System',
+      'logout': 'Logout',
+      'join': 'Join',
+      'players': 'Players',
+      'starts_in': 'Starts in',
+      'tournament_created': 'Tournament created',
+      'generate_coupon': 'Generate Coupon',
+      'coupon_code': 'Coupon Code',
+      'value': 'Value',
+      'condition': 'Condition',
+      'generate': 'Generate',
+      'active_coupons': 'Active Coupons',
+      'expiry': 'Expiry',
+      'time': 'Time',
+      'start_game': 'Start Game',
+      'you_win': 'You Win!',
+      'you_lose': 'You Lose',
+      'play_again': 'Play Again',
+      'back_to_home': 'Back to Home',
+      'add_funds': 'Add Funds',
+      'withdraw': 'Withdraw',
+      'no_active_coupons': 'No active coupons',
+      'redeem': 'Redeem',
+      'emergency_rules': 'Emergency Rules',
+      'tournament_name': 'Tournament Name',
+      'max_players': 'Max Players',
+      'start_date': 'Start Date',
+    },
+    'ar': {
+      'title': 'جاكارو كينج',
+      'home': 'الرئيسية',
+      'profile': 'الملف الشخصي',
+      'game': 'اللعبة',
+      'tournaments': 'البطولات',
+      'live_tournaments': 'البطولات الحية',
+      'events': 'الأحداث',
+      'wallet': 'المحفظة',
+      'balance': 'الرصيد',
+      'play': 'لعب',
+      'settings': 'الإعدادات',
+      'language': 'اللغة',
+      'theme': 'المظهر',
+      'statistics': 'الإحصائيات',
+      'win_ratio': 'نسبة الفوز',
+      'global_rank': 'الترتيب العالمي',
+      'prizes': 'الجوائز',
+      'customize': 'تخصيص',
+      'background': 'الخلفية',
+      'frames': 'الإطارات',
+      'notifications': 'الإشعارات',
+      'admin_panel': 'لوحة التحكم',
+      'create_tournament': 'إنشاء بطولة',
+      'coupons': 'الكوبونات',
+      'analytics': 'التحليلات',
+      'matchmaking': 'المطابقة',
+      'security': 'الأمان',
+      'arabic': 'العربية',
+      'english': 'الإنجليزية',
+      'light': 'فاتح',
+      'dark': 'داكن',
+      'system': 'النظام',
+      'logout': 'تسجيل الخروج',
+      'join': 'انضم',
+      'players': 'لاعبين',
+      'starts_in': 'يبدأ بعد',
+      'tournament_created': 'تم إنشاء البطولة',
+      'generate_coupon': 'إنشاء كوبون',
+      'coupon_code': 'كود الكوبون',
+      'value': 'القيمة',
+      'condition': 'الشرط',
+      'generate': 'إنشاء',
+      'active_coupons': 'كوبونات نشطة',
+      'expiry': 'انتهاء الصلاحية',
+      'time': 'الوقت',
+      'start_game': 'بدء اللعبة',
+      'you_win': 'لقد فزت!',
+      'you_lose': 'لقد خسرت',
+      'play_again': 'العب مرة أخرى',
+      'back_to_home': 'العودة للرئيسية',
+      'add_funds': 'إضافة رصيد',
+      'withdraw': 'سحب',
+      'no_active_coupons': 'لا توجد كوبونات نشطة',
+      'redeem': 'استبدال',
+      'emergency_rules': 'قواعد الطوارئ',
+      'tournament_name': 'اسم البطولة',
+      'max_players': 'أقصى عدد لاعبين',
+      'start_date': 'تاريخ البدء',
+    },
+  };
+
+  static String of(BuildContext context, String key) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return _localizedValues[locale]?[key] ?? key;
+  }
+}
+
+class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+  const AppLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => ['ar', 'en'].contains(locale.languageCode);
+
+  @override
+  Future<AppLocalizations> load(Locale locale) async =>
+      SynchronousFuture<AppLocalizations>(AppLocalizations());
+
+  @override
+  bool shouldReload(AppLocalizationsDelegate old) => false;
+}
+
+lib/shared/constants/navigation.dart
+
+import 'package:flutter/material.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+
+lib/features/wallet/wallet_screen.dart
+
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:fl_chart/fl_chart.dart';
+import '../../core/providers/user_provider.dart';
+import '../../core/models/user.dart';
+import '../../shared/localization/app_localizations.dart';
+import '../../shared/models/chart_data.dart';
+
+class WalletScreen extends StatelessWidget {
+  const WalletScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final user = Provider.of<UserProvider>(context).user;
+
+    return Scaffold(
+      appBar: AppBar(title: Text(AppLocalizations.of(context, 'wallet'))),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _buildBalanceCard(context, user),
+          const SizedBox(height: 24),
+          Text(
+            AppLocalizations.of(context, 'transaction_history'),
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 16),
+          _buildTransactionHistory(context),
+          const SizedBox(height: 24),
+          Text(
+            AppLocalizations.of(context, 'earnings_chart'),
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 16),
+          _buildEarningsChart(context),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          _showAddFundsDialog(context);
+        },
+        icon: const Icon(Icons.add),
+        label: Text(AppLocalizations.of(context, 'add_funds')),
+      ),
+    );
+  }
+
+  Widget _buildBalanceCard(BuildContext context, User user) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppLocalizations.of(context, 'current_balance'),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.account_balance_wallet, color: Colors.amber),
+                const SizedBox(width: 8),
+                Text(
+                  '${user.balance} ${AppLocalizations.of(context, 'balance')}',
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatItem(
+                    context,
+                    AppLocalizations.of(context, 'total_earned'),
+                    '${user.totalEarned}',
+                  ),
+                ),
+                Expanded(
+                  child: _buildStatItem(
+                    context,
+                    AppLocalizations.of(context, 'total_spent'),
+                    '${user.totalSpent}',
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatItem(BuildContext context, String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(height: 4),
+        Text(value, style: Theme.of(context).textTheme.titleMedium),
+      ],
+    );
+  }
+
+  Widget _buildTransactionHistory(BuildContext context) {
+    return Card(
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 5,
+        separatorBuilder: (context, index) => const Divider(),
+        itemBuilder: (context, index) {
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundColor: index % 2 == 0 ? Colors.green : Colors.red,
+              child: Icon(
+                index % 2 == 0 ? Icons.add : Icons.remove,
+                color: Colors.white,
+              ),
+            ),
+            title: Text(
+              index % 2 == 0
+                  ? AppLocalizations.of(context, 'tournament_win')
+                  : AppLocalizations.of(context, 'tournament_entry'),
+            ),
+            subtitle: Text('2024-03-${index + 1}'),
+            trailing: Text(
+              '${index % 2 == 0 ? '+' : '-'}${(index + 1) * 100}',
+              style: TextStyle(
+                color: index % 2 == 0 ? Colors.green : Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEarningsChart(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: SizedBox(
+          height: 200,
+          child: LineChart(
+            LineChartData(
+              gridData: FlGridData(show: false),
+              titlesData: FlTitlesData(
+                show: true,
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          '${value.toInt()}',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      );
+                    },
+                    reservedSize: 30,
+                  ),
+                ),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      return Text(
+                        value.toInt().toString(),
+                        style: const TextStyle(fontSize: 12),
+                      );
+                    },
+                    reservedSize: 40,
+                  ),
+                ),
+                topTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                rightTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+              ),
+              borderData: FlBorderData(show: false),
+              lineBarsData: [
+                LineChartBarData(
+                  spots: [
+                    const FlSpot(1, 100),
+                    const FlSpot(2, 200),
+                    const FlSpot(3, 150),
+                    const FlSpot(4, 300),
+                    const FlSpot(5, 250),
+                  ],
+                  isCurved: true,
+                  color: Colors.blue,
+                  barWidth: 3,
+                  isStrokeCapRound: true,
+                  dotData: FlDotData(show: true),
+                  belowBarData: BarAreaData(
+                    show: true,
+                    color: Colors.blue.withOpacity(0.2),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showAddFundsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(AppLocalizations.of(context, 'add_funds')),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context, 'amount'),
+                    prefixIcon: const Icon(Icons.attach_money),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context, 'payment_method'),
+                    prefixIcon: const Icon(Icons.payment),
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'credit_card',
+                      child: Text(AppLocalizations.of(context, 'credit_card')),
+                    ),
+                    DropdownMenuItem(
+                      value: 'paypal',
+                      child: Text(AppLocalizations.of(context, 'paypal')),
+                    ),
+                    DropdownMenuItem(
+                      value: 'bank_transfer',
+                      child: Text(
+                        AppLocalizations.of(context, 'bank_transfer'),
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {},
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(AppLocalizations.of(context, 'cancel')),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(AppLocalizations.of(context, 'add')),
+              ),
+            ],
+          ),
+    );
+  }
+}
+
+lib/features/tournament/tournament_list.dart
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../core/providers/tournament_provider.dart';
+import '../../shared/localization/app_localizations.dart';
+
+class TournamentList extends StatelessWidget {
+  const TournamentList({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final tournaments = Provider.of<TournamentProvider>(context).tournaments;
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: tournaments.length,
+      itemBuilder: (context, index) {
+        final tournament = tournaments[index];
+        return Card(
+          margin: const EdgeInsets.only(bottom: 16),
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(16),
+            leading: const Icon(
+              Icons.emoji_events,
+              size: 40,
+              color: Colors.amber,
+            ),
+            title: Text(tournament.name),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
+                Text(
+                  '${tournament.prize} ${AppLocalizations.of(context, 'balance')}',
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${AppLocalizations.of(context, 'players')}: ${tournament.players}/${tournament.maxPlayers}',
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${AppLocalizations.of(context, 'starts_in')}: ${tournament.timeLeft}',
+                ),
+              ],
+            ),
+            trailing: ElevatedButton(
+              onPressed: () {
+                Provider.of<TournamentProvider>(
+                  context,
+                  listen: false,
+                ).joinTournament(tournament.id);
+              },
+              child: Text(AppLocalizations.of(context, 'join')),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+lib/features/tournament/tournaments_screen.dart
+
+import 'package:flutter/material.dart';
+import '../../shared/localization/app_localizations.dart';
+import 'tournament_list.dart';
+
+class TournamentsScreen extends StatelessWidget {
+  const TournamentsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(AppLocalizations.of(context, 'tournaments'))),
+      body: const TournamentList(),
+    );
+  }
+}
+
+
+lib/features/settings/settings_screen.dart
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../core/providers/theme_provider.dart';
+import '../../core/providers/language_provider.dart';
+import '../../shared/localization/app_localizations.dart';
+
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(AppLocalizations.of(context, 'settings'))),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _buildSection(context, AppLocalizations.of(context, 'appearance'), [
+            _buildThemeSwitch(context),
+            _buildLanguageSelector(context),
+          ]),
+          const SizedBox(height: 24),
+          _buildSection(
+            context,
+            AppLocalizations.of(context, 'notifications'),
+            [
+              _buildNotificationSwitch(
+                context,
+                AppLocalizations.of(context, 'tournament_notifications'),
+                true,
+              ),
+              _buildNotificationSwitch(
+                context,
+                AppLocalizations.of(context, 'prize_notifications'),
+                true,
+              ),
+              _buildNotificationSwitch(
+                context,
+                AppLocalizations.of(context, 'promotion_notifications'),
+                false,
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          _buildSection(context, AppLocalizations.of(context, 'account'), [
+            _buildAccountOption(
+              context,
+              AppLocalizations.of(context, 'change_password'),
+              Icons.lock_outline,
+            ),
+            _buildAccountOption(
+              context,
+              AppLocalizations.of(context, 'privacy_settings'),
+              Icons.privacy_tip_outlined,
+            ),
+            _buildAccountOption(
+              context,
+              AppLocalizations.of(context, 'delete_account'),
+              Icons.delete_outline,
+              isDestructive: true,
+            ),
+          ]),
+          const SizedBox(height: 24),
+          _buildSection(context, AppLocalizations.of(context, 'about'), [
+            _buildAboutOption(
+              context,
+              AppLocalizations.of(context, 'terms_of_service'),
+            ),
+            _buildAboutOption(
+              context,
+              AppLocalizations.of(context, 'privacy_policy'),
+            ),
+            _buildAboutOption(
+              context,
+              AppLocalizations.of(context, 'version'),
+              trailing: const Text('1.0.0'),
+            ),
+          ]),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSection(
+    BuildContext context,
+    String title,
+    List<Widget> children,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 16),
+        Card(child: Column(children: children)),
+      ],
+    );
+  }
+
+  Widget _buildThemeSwitch(BuildContext context) {
+    return SwitchListTile(
+      title: Text(AppLocalizations.of(context, 'dark_mode')),
+      value: Provider.of<ThemeProvider>(context).isDarkMode,
+      onChanged: (value) {
+        Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+      },
+    );
+  }
+
+  Widget _buildLanguageSelector(BuildContext context) {
+    final currentLanguage =
+        Provider.of<LanguageProvider>(context).currentLanguage;
+
+    return ListTile(
+      title: Text(AppLocalizations.of(context, 'language')),
+      trailing: DropdownButton<String>(
+        value: currentLanguage,
+        items: [
+          DropdownMenuItem(
+            value: 'en',
+            child: Text(AppLocalizations.of(context, 'english')),
+          ),
+          DropdownMenuItem(
+            value: 'ar',
+            child: Text(AppLocalizations.of(context, 'arabic')),
+          ),
+        ],
+        onChanged: (value) {
+          if (value != null) {
+            Provider.of<LanguageProvider>(
+              context,
+              listen: false,
+            ).setLanguage(value);
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildNotificationSwitch(
+    BuildContext context,
+    String title,
+    bool initialValue,
+  ) {
+    return SwitchListTile(
+      title: Text(title),
+      value: initialValue,
+      onChanged: (value) {
+      },
+    );
+  }
+
+  Widget _buildAccountOption(
+    BuildContext context,
+    String title,
+    IconData icon, {
+    bool isDestructive = false,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: isDestructive ? Colors.red : null),
+      title: Text(
+        title,
+        style: TextStyle(color: isDestructive ? Colors.red : null),
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () {
+      },
+    );
+  }
+
+  Widget _buildAboutOption(
+    BuildContext context,
+    String title, {
+    Widget? trailing,
+  }) {
+    return ListTile(
+      title: Text(title),
+      trailing: trailing ?? const Icon(Icons.chevron_right),
+      onTap: () {
+      },
+    );
+  }
+}
+
+
+lib/features/profile/profile_screen.dart
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:fl_chart/fl_chart.dart';
+import '../../core/providers/user_provider.dart';
+import '../../core/models/user.dart';
+import '../../shared/localization/app_localizations.dart';
+import '../../shared/models/chart_data.dart';
+import '../../shared/widgets/rating_bar_indicator.dart';
+
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final user = Provider.of<UserProvider>(context).user;
+
+    return Scaffold(
+      appBar: AppBar(title: Text(AppLocalizations.of(context, 'profile'))),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _buildProfileHeader(context, user),
+          const SizedBox(height: 24),
+          Text(
+            AppLocalizations.of(context, 'statistics'),
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 16),
+          _buildStatisticsSection(context, user),
+          const SizedBox(height: 24),
+          Text(
+            AppLocalizations.of(context, 'prizes'),
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 16),
+          _buildPrizesSection(),
+          const SizedBox(height: 24),
+          Text(
+            AppLocalizations.of(context, 'customize'),
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 16),
+          _buildCustomizationSection(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileHeader(BuildContext context, User user) {
+    return Row(
+      children: [
+        CircleAvatar(
+          radius: 50,
+          backgroundColor: Colors.grey[200],
+          backgroundImage: const AssetImage('img/avatar.png'),
+        ),
+        const SizedBox(width: 20),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                user.name,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '${AppLocalizations.of(context, 'global_rank')}: #${user.rank}',
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.account_balance_wallet, color: Colors.amber),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${user.balance} ${AppLocalizations.of(context, 'balance')}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatisticsSection(BuildContext context, User user) {
+    final winRatio = user.winRatio;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${AppLocalizations.of(context, 'win_ratio')}: ${(winRatio * 100).toStringAsFixed(1)}%',
+                  style: const TextStyle(fontSize: 18),
+                ),
+                RatingBarIndicator(
+                  rating: winRatio * 5,
+                  itemBuilder:
+                      (context, index) =>
+                          const Icon(Icons.star, color: Colors.amber),
+                  itemCount: 5,
+                  itemSize: 20.0,
+                  direction: Axis.horizontal,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 200,
+              child: BarChart(
+                BarChartData(
+                  alignment: BarChartAlignment.spaceAround,
+                  maxY: (user.wins + user.losses).toDouble(),
+                  barTouchData: BarTouchData(enabled: false),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          const titles = ['Wins', 'Losses'];
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              titles[value.toInt()],
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    topTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                  ),
+                  borderData: FlBorderData(show: false),
+                  barGroups: [
+                    BarChartGroupData(
+                      x: 0,
+                      barRods: [
+                        BarChartRodData(
+                          toY: user.wins.toDouble(),
+                          color: Colors.blue,
+                          width: 20,
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(4),
+                          ),
+                        ),
+                      ],
+                    ),
+                    BarChartGroupData(
+                      x: 1,
+                      barRods: [
+                        BarChartRodData(
+                          toY: user.losses.toDouble(),
+                          color: Colors.red,
+                          width: 20,
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(4),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPrizesSection() {
+    return SizedBox(
+      height: 180,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          _buildPrizeCard('سيارة BMW', 'img/car.jpg'),
+          _buildPrizeCard('شهادة ذهب', 'img/gold.jpg'),
+          _buildPrizeCard('آيفون 14', 'img/iphone.jpg'),
+          _buildPrizeCard('رحلة إلى دبي', 'img/dubai.jpg'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrizeCard(String title, String image) {
+    return Container(
+      width: 160,
+      margin: const EdgeInsets.only(right: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: .3),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            child: Image.asset(
+              image,
+              height: 120,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCustomizationSection() {
+    return Wrap(
+      spacing: 16,
+      runSpacing: 16,
+      children: [
+        _buildCustomizationOption('خلفية زرقاء', 'img/blue_bg.jpg'),
+        _buildCustomizationOption('خلفية حمراء', 'img/red.jpg'),
+        _buildCustomizationOption('إطار ذهبي', 'img/gold_frame.png'),
+        _buildCustomizationOption('إطار فضي', 'img/silver_frame.png'),
+      ],
+    );
+  }
+
+  Widget _buildCustomizationOption(String title, String image) {
+    return GestureDetector(
+      onTap: () {},
+      child: Column(
+        children: [
+          Container(
+            width: 100,
+            height: 100,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              image: DecorationImage(
+                image: AssetImage(image),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(title),
+        ],
+      ),
+    );
+  }
+}
+
+lib/features/navigation/splash_screen.dart
+
+import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:lottie/lottie.dart';
+import 'package:go_router/go_router.dart';
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen>
+    with TickerProviderStateMixin {
+  late final AudioPlayer _audioPlayer;
+  late AnimationController _fadeController;
+  late AnimationController _scaleController;
+  late AnimationController _textController;
+  late AnimationController _loadingController;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _textAnimation;
+  late Animation<double> _loadingAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeAnimations();
+    _startSplashSequence();
+  }
+
+  void _initializeAnimations() {
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _scaleController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+    _textController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    _loadingController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
+    );
+
+    _textAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _textController, curve: Curves.easeInOut),
+    );
+
+    _loadingAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _loadingController, curve: Curves.easeInOut),
+    );
+  }
+
+  Future<void> _startSplashSequence() async {
+    _audioPlayer = AudioPlayer();
+    await _audioPlayer.setSource(AssetSource('sounds/splash.mp3'));
+    await _audioPlayer.resume();
+
+    // Start animations with delays
+    _fadeController.forward();
+    _scaleController.forward();
+
+    // Delay text animation
+    await Future.delayed(const Duration(milliseconds: 800));
+    _textController.forward();
+
+    // Delay loading animation
+    await Future.delayed(const Duration(milliseconds: 1200));
+    _loadingController.forward();
+
+    await Future.delayed(const Duration(seconds: 4));
+
+    if (mounted) {
+      context.go('/');
+    }
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    _fadeController.dispose();
+    _scaleController.dispose();
+    _textController.dispose();
+    _loadingController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF1A0F0F), // Dark red-brown background
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(color: Color(0xFF1A0F0F)),
+        child: SafeArea(
+          child: Column(
+            children: [
+              const Spacer(),
+              // Main content with animations
+              AnimatedBuilder(
+                animation: Listenable.merge([
+                  _fadeController,
+                  _scaleController,
+                ]),
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _scaleAnimation.value,
+                    child: Opacity(
+                      opacity: _fadeAnimation.value,
+                      child: Column(
+                        children: [
+                          // Lottie animation with proper sizing
+                          Container(
+                            width: 350,
+                            height: 350,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(
+                                    0xFFFFD700,
+                                  ).withOpacity(0.3),
+                                  blurRadius: 30,
+                                  spreadRadius: 5,
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Lottie.asset(
+                                'assets/lottie/splash.json',
+                                width: 350,
+                                height: 350,
+                                repeat: false,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 30),
+                          // Animated Arabic text with treasure theme
+                          AnimatedBuilder(
+                            animation: _textController,
+                            builder: (context, child) {
+                              return Transform.translate(
+                                offset: Offset(
+                                  0,
+                                  20 * (1 - _textAnimation.value),
+                                ),
+                                child: Opacity(
+                                  opacity: _textAnimation.value,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 30,
+                                      vertical: 15,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFFFFD700), // Gold
+                                          Color(0xFFFFA500), // Orange
+                                        ],
+                                      ),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(
+                                        color: const Color(0xFFFF4500),
+                                        width: 2,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: const Color(
+                                            0xFFFFD700,
+                                          ).withOpacity(0.5),
+                                          blurRadius: 15,
+                                          spreadRadius: 2,
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Text(
+                                      'الكنز',
+                                      style: TextStyle(
+                                        fontFamily: 'TufuliArabic',
+                                        fontSize: 42,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF8B0000), // Dark red
+                                        letterSpacing: 3,
+                                        shadows: [
+                                          Shadow(
+                                            offset: Offset(1, 1),
+                                            blurRadius: 3,
+                                            color: Color(0xFF000000),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const Spacer(),
+              // Game-style loading indicator
+              AnimatedBuilder(
+                animation: _loadingController,
+                builder: (context, child) {
+                  return Opacity(
+                    opacity: _loadingAnimation.value,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 50),
+                      child: Column(
+                        children: [
+                          // Custom game-style loading bar
+                          Container(
+                            width: 200,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2A1A1A),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: const Color(0xFFFFD700),
+                                width: 1,
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: LinearProgressIndicator(
+                                backgroundColor: Colors.transparent,
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Color(0xFFFFD700),
+                                ),
+                                minHeight: 8,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          Text(
+                            'جاري التحميل...',
+                            style: TextStyle(
+                              fontFamily: 'TufuliArabic',
+                              fontSize: 16,
+                              color: const Color(0xFFFFD700),
+                              fontWeight: FontWeight.w600,
+                              shadows: [
+                                Shadow(
+                                  offset: const Offset(1, 1),
+                                  blurRadius: 2,
+                                  color: Colors.black.withOpacity(0.5),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+lib/features/navigation/main_navigation_screen.dart
+
+import 'package:flutter/material.dart';
+import '../../shared/localization/app_localizations.dart';
+import '../home/home_screen.dart';
+import '../tournament/tournaments_screen.dart';
+import '../profile/profile_screen.dart';
+import '../settings/settings_screen.dart';
+
+class MainNavigationScreen extends StatefulWidget {
+  const MainNavigationScreen({super.key});
+
+  @override
+  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+}
+
+class _MainNavigationScreenState extends State<MainNavigationScreen> {
+  int _selectedIndex = 0;
+
+  static final List<Widget> _widgetOptions = [
+    const HomeScreen(),
+    const TournamentsScreen(),
+    const ProfileScreen(),
+    const SettingsScreen(),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _widgetOptions.elementAt(_selectedIndex),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
+        items: [
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.home),
+            label: AppLocalizations.of(context, 'home'),
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.emoji_events),
+            label: AppLocalizations.of(context, 'tournaments'),
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person),
+            label: AppLocalizations.of(context, 'profile'),
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.settings),
+            label: AppLocalizations.of(context, 'settings'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+lib/features/home/home_screen.dart
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../core/providers/tournament_provider.dart';
+import '../../shared/localization/app_localizations.dart';
+import '../tournament/tournament_list.dart';
+import '../game/presentation/screens/game_screen.dart';
+import '../wallet/wallet_screen.dart';
+
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context, 'title')),
+        actions: [
+          IconButton(icon: const Icon(Icons.notifications), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.account_balance_wallet),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const WalletScreen()),
+              );
+            },
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          _buildFeaturedTournament(context),
+          const SizedBox(height: 24),
+          Text(
+            AppLocalizations.of(context, 'live_tournaments'),
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 12),
+          const TournamentList(),
+          const SizedBox(height: 24),
+          Text(
+            AppLocalizations.of(context, 'events'),
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 12),
+          _buildEventsSection(),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const GameScreen()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: Text(AppLocalizations.of(context, 'play')),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeaturedTournament(BuildContext context) {
+    final tournament =
+        Provider.of<TournamentProvider>(context).tournaments.first;
+
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 4,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              tournament.name,
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.emoji_events, color: Colors.amber),
+                const SizedBox(width: 8),
+                Text(
+                  '${tournament.prize} ${AppLocalizations.of(context, 'balance')}',
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            LinearProgressIndicator(
+              value: tournament.players / tournament.maxPlayers,
+              backgroundColor: Colors.grey[300],
+              color: Theme.of(context).colorScheme.secondary,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${tournament.players}/${tournament.maxPlayers} ${AppLocalizations.of(context, 'players')}',
+              style: const TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Provider.of<TournamentProvider>(
+                  context,
+                  listen: false,
+                ).joinTournament(tournament.id);
+              },
+              child: Text(AppLocalizations.of(context, 'join')),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEventsSection() {
+    return SizedBox(
+      height: 200,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          _buildEventCard(
+            'رمضان كريم',
+            'احصل على 500 نقطة مجانًا',
+            'img/ramadan.jpg',
+          ),
+          _buildEventCard(
+            'عودة المدارس',
+            'خصم 20% على جميع المشتريات',
+            'img/school.jpg',
+          ),
+          _buildEventCard(
+            'عيد الأضحى',
+            'جوائز خاصة بقيمة 10,000 نقطة',
+            'img/eid.jpg',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEventCard(String title, String description, String image) {
+    return Container(
+      width: 280,
+      margin: const EdgeInsets.only(right: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        image: DecorationImage(image: AssetImage(image), fit: BoxFit.cover),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [Colors.black.withValues(alpha: .8), Colors.transparent],
+          ),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+lib/features/game/presentation/screens/game_screen.dart
+
+
+import 'package:elkeenz/features/game/logic/game_card.dart';
+import 'package:elkeenz/features/game/logic/game_paths.dart';
+import 'package:elkeenz/features/game/logic/pawn.dart';
+import 'package:flutter/material.dart';
+
+
+class GameScreen extends StatefulWidget {
+  const GameScreen({super.key});
+
+  @override
+  State<GameScreen> createState() => _GameScreenState();
+}
+
+class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
+  GameCard? droppedCard;
+  List<Pawn> player1Pawns = List.generate(
+    4,
+    (i) => Pawn(playerId: 1, positionIndex: i),
+  );
+  int currentPawnIndex = 0;
+  String? effectTitle;
+  String? effectDescription;
+  String? effectCardPath;
+  late AnimationController _pawnMoveController;
+  // late Animation<Offset> _pawnOffsetAnimation;
+
+  late AnimationController _cardDropController;
+  late Animation<double> _cardScaleAnimation;
+
+  void _onCardDrop(GameCard card) {
+    if (droppedCard != null) return;
+
+    final allInHome = player1Pawns.every(
+      (p) => p.locationType == PawnLocationType.home,
+    );
+    if (allInHome && !card.canExitHome) {
+      _showCardEffect(
+        title: 'لا يمكن',
+        description: "لا يمكنك اللعب بهذا الكارت، يجب أن تخرج حجر من البيت.",
+      );
+      return;
+    }
+
+    _showCardEffect(
+      title: 'تم لعب "${card.name}"',
+      description: card.description,
+      cardPath: card.path,
+    );
+
+    setState(() {
+      droppedCard = card;
+      cardsInHand.removeWhere((c) => c.path == card.path);
+    });
+
+    _cardDropController.forward().then((_) {
+      _movePawn(card.value);
+    });
+  }
+
+  void _showCardEffect({String? title, String? description, String? cardPath}) {
+    setState(() {
+      effectTitle = title;
+      effectDescription = description;
+      effectCardPath = cardPath;
+    });
+
+    Future.delayed(const Duration(seconds: 4), () {
+      if (mounted) {
+        setState(() {
+          effectTitle = null;
+          effectDescription = null;
+          effectCardPath = null;
+        });
+      }
+    });
+  }
+
+  Future<void> _movePawn(int steps) async {
+    final pawn = player1Pawns[currentPawnIndex];
+    for (var i = 0; i < steps; i++) {
+      pawn.move(1, GamePaths.path.length - 1, GamePaths.player1win.length, 0);
+      setState(() {});
+      await Future.delayed(const Duration(milliseconds: 300));
+    }
+
+    _cardDropController.reverse().then((_) {
+      setState(() {
+        droppedCard = null;
+      });
+    });
+  }
+
+  Offset _getPawnOffset(Pawn pawn, double width, double height) {
+    Offset pos;
+    switch (pawn.locationType) {
+      case PawnLocationType.home:
+        pos = GamePaths.player1home[pawn.positionIndex];
+        break;
+      case PawnLocationType.mainPath:
+        pos = GamePaths.path[pawn.positionIndex];
+        break;
+      case PawnLocationType.winPath:
+        pos = GamePaths.player1win[pawn.positionIndex];
+        break;
+    }
+    return Offset(pos.dx * width, pos.dy * height);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _pawnMoveController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _cardDropController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+
+    // _pawnOffsetAnimation = Tween<Offset>(
+    //   begin: Offset.zero,
+    //   end: Offset.zero,
+    // ).animate(_pawnMoveController);
+
+    _cardScaleAnimation = CurvedAnimation(
+      parent: _cardDropController,
+      curve: Curves.easeOutBack,
+    );
+  }
+
+  @override
+  void dispose() {
+    _pawnMoveController.dispose();
+    _cardDropController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFa03e21),
+      body: Center(
+        child: AspectRatio(
+          aspectRatio: 9.0 / 19.5,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final height = constraints.maxHeight;
+              final center = Offset(width / 2, height / 2);
+
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned.fill(
+                    child: Image.asset('assets/board.png', fit: BoxFit.cover),
+                  ),
+                  if (effectTitle != null)
+                    Positioned(
+                      top: 60,
+                      left: 20,
+                      right: 20,
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 300),
+                        opacity: effectTitle != null ? 1.0 : 0.0,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              color: Colors.black.withOpacity(0.75),
+                              border: Border.all(
+                                color: Colors.yellow.withOpacity(0.5),
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.yellow.withOpacity(0.3),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              textDirection: TextDirection.rtl,
+                              children: [
+                                if (effectCardPath != null)
+                                  Container(
+                                    width: 50,
+                                    height: 75,
+                                    margin: const EdgeInsets.only(left: 12),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(6),
+                                      image: DecorationImage(
+                                        image: AssetImage(effectCardPath!),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  const Padding(
+                                    padding: EdgeInsets.only(left: 12.0),
+                                    child: Icon(
+                                      Icons.warning_amber_rounded,
+                                      color: Colors.amber,
+                                      size: 40,
+                                    ),
+                                  ),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        effectTitle!,
+                                        textAlign: TextAlign.left,
+                                        style: const TextStyle(
+                                          color: Colors.amber,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 17,
+                                        ),
+                                      ),
+                                      if (effectDescription != null) ...[
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          effectDescription!,
+                                          textAlign: TextAlign.left,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  ...player1Pawns.map((pawn) {
+                    final pawnPos = _getPawnOffset(pawn, width, height);
+                    return Positioned(
+                      left: pawnPos.dx - 4,
+                      top: pawnPos.dy - 4,
+                      child: Container(
+                        width: 8.5,
+                        height: 8.5,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [Colors.red.shade200, Colors.red.shade900],
+                            center: const Alignment(-0.5, -0.5),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              blurRadius: 2,
+                              offset: const Offset(1, 1),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+
+                  // Drop Zone
+                  Positioned(
+                    left: center.dx - 40,
+                    top: center.dy - 55,
+                    width: 80,
+                    height: 100,
+                    child: DragTarget<GameCard>(
+                      builder: (context, candidateData, rejectedData) {
+                        return droppedCard == null
+                            ? Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(
+                                    candidateData.isNotEmpty ? 0.8 : 0.3,
+                                  ),
+                                  width: 3,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  'Drop Card Here',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(
+                                      candidateData.isNotEmpty ? 0.9 : 0.5,
+                                    ),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            )
+                            : const SizedBox.shrink();
+                      },
+                      onWillAccept: (data) => droppedCard == null,
+                      onAccept: _onCardDrop,
+                    ),
+                  ),
+
+                  // Dropped card in the center
+                  if (droppedCard != null)
+                    Positioned(
+                      left: center.dx - 40,
+                      top: center.dy - 60,
+                      width: 80,
+                      height: 110,
+                      child: ScaleTransition(
+                        scale: _cardScaleAnimation,
+                        child: Material(
+                          elevation: 10,
+                          borderRadius: BorderRadius.circular(8),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.asset(
+                              droppedCard!.path,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  // Cards
+                  Positioned(
+                    bottom: 60,
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children:
+                          cardsInHand.map((card) {
+                            return Draggable<GameCard>(
+                              data: card,
+                              feedback: Material(
+                                elevation: 8,
+                                borderRadius: BorderRadius.circular(8),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.asset(
+                                    card.path,
+                                    width: 80,
+                                    height: 120,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              childWhenDragging: SizedBox(
+                                width: 60,
+                                height: 90,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              ),
+                              child: Image.asset(
+                                card.path,
+                                width: 60,
+                                height: 90,
+                                fit: BoxFit.contain,
+                              ),
+                            );
+                          }).toList(),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+lib/features/game/logic/game_card.dart
+
+enum CardType {
+  move,       
+  exitHome,    
+  swap,        
+  steal,       
+  backward,    
+  splitMove,   
+}
+
+class GameCard {
+  final String path;
+  final int value; 
+  final String name;
+  final CardType type;
+    final String? description;
+
+  final bool canExitHome;
+
+  GameCard({
+    required this.path,
+    required this.value,
+    required this.name,
+    this.description ,
+    required this.type,
+    this.canExitHome = false,
+  });
+}
+List<GameCard> cardsInHand = [
+  GameCard(
+    path: 'assets/cards/1.png',
+    value: 1,
+    name: '1',
+    description: 'تحرك خطوة واحدة أو اخرج حجر من البيت',
+    type: CardType.move,
+    canExitHome: true,
+  ),
+  GameCard(
+    path: 'assets/cards/king.png',
+    value: 13,
+    name: 'King',
+    type: CardType.exitHome,
+    canExitHome: true,
+    description: 'اخرج حجر أو تحرك 13 خطوة'
+  ),
+  GameCard(
+    path: 'assets/cards/4.png',
+    value: 4,
+    name: '4',
+    description: 'ارجع ٤ خطوات إلى الخلف',
+    type: CardType.backward,
+  ),
+  GameCard(
+    path: 'assets/cards/7.png',
+    value: 7,
+    name: '7',
+    type: CardType.splitMove,
+  ),
+  GameCard(
+    path: 'assets/cards/jack.png',
+    value: 0,
+    name: 'Jack (Red)',
+    type: CardType.swap,
+  ),
+  // GameCard(
+  //   path: 'assets/cards/10.png',
+  //   value: 10,
+  //   name: '10',
+  //   type: CardType.steal,
+  // ),
+];
+
+
+lib/features/game/logic/game_paths.dart
+
+import 'package:flutter/material.dart';
+
+class GamePaths {
+  static final List<Offset> player1win = [
+    const Offset(0.5, 0.629),
+    const Offset(0.5, 0.615),
+    const Offset(0.5, 0.60),
+    const Offset(0.5, 0.586),
+  ];
+  static final List<Offset> player2win = [
+    const Offset(0.210, 0.495),
+    const Offset(0.239, 0.495),
+    const Offset(0.271, 0.495),
+    const Offset(0.302, 0.495),
+  ];
+  static final List<Offset> player3win = [
+    const Offset(0.5, 0.362),
+    const Offset(0.5, 0.375),
+    const Offset(0.5, 0.389),
+    const Offset(0.5, 0.403),
+  ];
+  static final List<Offset> player4win = [
+    const Offset(0.792, 0.494),
+    const Offset(0.760, 0.494),
+    const Offset(0.730, 0.494),
+    const Offset(0.699, 0.494),
+  ];
+  static final List<Offset> player1home = [
+    const Offset(0.22, 0.553),
+    const Offset(0.265, 0.553),
+    const Offset(0.243, 0.563),
+    const Offset(0.243, 0.543),
+  ];
+  static final List<Offset> player2home = [
+    const Offset(0.395, 0.376),
+    const Offset(0.352, 0.376),
+    const Offset(0.373, 0.386),
+    const Offset(0.373, 0.366),
+  ];
+  static final List<Offset> player3home = [
+    const Offset(0.759, 0.446),
+    const Offset(0.759, 0.426),
+    const Offset(0.780, 0.437),
+    const Offset(0.737, 0.437),
+  ];
+  static final List<Offset> player4home = [
+    const Offset(0.605, 0.614),
+    const Offset(0.648, 0.614),
+    const Offset(0.627, 0.624),
+    const Offset(0.627, 0.604),
+  ];
+
+  static final List<Offset> path = [
+    const Offset(0.440, 0.644),
+    const Offset(0.440, 0.630),
+    const Offset(0.440, 0.615),
+    const Offset(0.440, 0.600),
+    const Offset(0.440, 0.586),
+    const Offset(0.440, 0.572),
+    const Offset(0.419, 0.564),
+    const Offset(0.397, 0.554),
+    const Offset(0.376, 0.542),
+    const Offset(0.354, 0.533),
+    const Offset(0.332, 0.523),
+    const Offset(0.302, 0.523),
+    const Offset(0.272, 0.523),
+    const Offset(0.242, 0.523),
+    const Offset(0.212, 0.523),
+    const Offset(0.181, 0.523),
+    const Offset(0.181, 0.509),
+    const Offset(0.181, 0.495),
+    const Offset(0.181, 0.481),
+    const Offset(0.181, 0.467),
+    const Offset(0.181, 0.467),
+    const Offset(0.212, 0.467),
+    const Offset(0.242, 0.467),
+    const Offset(0.272, 0.467),
+    const Offset(0.302, 0.467),
+    const Offset(0.332, 0.467),
+    const Offset(0.354, 0.456),
+    const Offset(0.376, 0.445),
+    const Offset(0.396, 0.436),
+    const Offset(0.417, 0.427),
+    const Offset(0.438, 0.418),
+    const Offset(0.438, 0.402),
+    const Offset(0.438, 0.388),
+    const Offset(0.438, 0.374),
+    const Offset(0.438, 0.360),
+    const Offset(0.438, 0.346),
+    const Offset(0.470, 0.346),
+    const Offset(0.5, 0.346),
+    const Offset(0.530, 0.346),
+    const Offset(0.560, 0.346),
+    const Offset(0.560, 0.360),
+    const Offset(0.560, 0.374),
+    const Offset(0.560, 0.388),
+    const Offset(0.560, 0.402),
+    const Offset(0.560, 0.418),
+    const Offset(0.582, 0.428),
+    const Offset(0.603, 0.437),
+    const Offset(0.624, 0.446),
+    const Offset(0.645, 0.456),
+    const Offset(0.666, 0.466),
+    const Offset(0.699, 0.466),
+    const Offset(0.730, 0.466),
+    const Offset(0.760, 0.466),
+    const Offset(0.790, 0.466),
+    const Offset(0.820, 0.466),
+    const Offset(0.820, 0.480),
+    const Offset(0.820, 0.494),
+    const Offset(0.820, 0.508),
+    const Offset(0.820, 0.522),
+    const Offset(0.790, 0.522),
+    const Offset(0.760, 0.522),
+    const Offset(0.730, 0.522),
+    const Offset(0.699, 0.522),
+    const Offset(0.667, 0.522),
+    const Offset(0.647, 0.534),
+    const Offset(0.626, 0.545),
+    const Offset(0.606, 0.554),
+    const Offset(0.585, 0.564),
+    const Offset(0.562, 0.573),
+    const Offset(0.562, 0.588),
+    const Offset(0.562, 0.602),
+    const Offset(0.562, 0.616),
+    const Offset(0.562, 0.630),
+    const Offset(0.562, 0.644),
+    const Offset(0.532, 0.644),
+    const Offset(0.5, 0.644),
+    const Offset(0.5, 0.644),
+    const Offset(0.470, 0.644),
+  ];
+}
+
+lib/features/game/logic/pawn.dart
+
+enum PawnLocationType { home, mainPath, winPath }
+
+class Pawn {
+  final int playerId;
+  PawnLocationType locationType;
+  int positionIndex;
+
+  Pawn({
+    required this.playerId,
+    this.locationType = PawnLocationType.home,
+    this.positionIndex = 0,
+  });
+
+  void move(int steps, int mainPathLength, int winPathLength, int playerStartIndex) {
+    switch (locationType) {
+      case PawnLocationType.home:
+        locationType = PawnLocationType.mainPath;
+        positionIndex = playerStartIndex;
+        break;
+      case PawnLocationType.mainPath:
+        positionIndex += steps;
+        if (positionIndex >= mainPathLength) {
+          locationType = PawnLocationType.winPath;
+          positionIndex = positionIndex - mainPathLength;
+        }
+        break;
+      case PawnLocationType.winPath:
+        positionIndex += steps;
+        if (positionIndex >= winPathLength) {
+          positionIndex = winPathLength - 1;
+        }
+        break;
+    }
+  }
+}
